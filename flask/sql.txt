@@ -1,0 +1,70 @@
+
+create table users
+(
+id int(5) unsigned AUTO_INCREMENT, #用户id
+nickname varchar(30), #用户名
+openid char(128), #用户唯一标识
+unionid char(128), #用户在开放平台的唯一标识符
+session_key char(128), #会话密钥
+address varchar(60), #地址信息
+phone char(11), #电话号码
+PRIMARY KEY(id) #主键约束
+);
+
+create table items
+(
+item_id int(5) unsigned AUTO_INCREMENT, #项目id
+item_name varchar(20) NOT NULL,#项目名称
+pass_id char(10) NOT NULL, #项目口令
+lau_usId int(5) unsigned, #发起用户id
+item_type enum("1","2") NOT NULL, #项目类型
+contacts varchar(20) not null, #联系方式
+start_time timestamp NOT NULL, #开始时间
+end_time timestamp NOT NULL, #结束时间
+item_address varchar(60), #项目地址
+text_info varchar(150), #文本说明（介绍）
+img_info varchar(100), #图片说明
+lau_time timestamp default NOW(), #发起时间
+PRIMARY KEY(item_id),
+CONSTRAINT launch FOREIGN KEY(lau_usId) REFERENCES users(openid),
+UNIQUE INDEX UniqIdx(pass_id) #唯一索引
+);
+
+create table ord_objects
+(
+obj_id int(5) unsigned AUTO_INCREMENT, #对象id
+itemId int(5) unsigned, #对象所属的项目的id
+obj_num int(3) unsigned, #对象在其所属项目的位序
+obj_name varchar(15), #对象的名字
+minOrd_time  int(5), #最小预定时间
+startOrd_time datetime NOT NULL, #预约开始时间
+ordable_sum int(3) unsigned NOT NULL, #设置的该对象预约人数上限
+residue int(3) unsigned NOT NULL, #该对象剩余可以被预约的次数
+logic_del int(1) DEFAULT 1, #逻辑删除
+PRIMARY KEY(obj_id),
+CONSTRAINT depend FOREIGN KEY(itemId) REFERENCES items(item_id)
+);
+
+create table orders
+(
+ord_id int(8) unsigned AUTO_INCREMENT, #预约任务号id
+ord_num int(5) unsigned NOT NULL,#预约订单的单号
+objId int(5) unsigned, #被预定的对象的id
+ord_usId int(5) unsigned,#预约的用户
+queue_num int(3) DEFAULT -1,#分发的队号
+place_time timestamp default NOW(),#提交预约时间
+PRIMARY KEY(ord_id),
+CONSTRAINT orded_obj FOREIGN KEY(objId) REFERENCES ord_objects(obj_id),
+CONSTRAINT orded_us FOREIGN KEY(ord_usId) REFERENCES users(openid)
+);
+
+sqlacodegen mysql://root:123456@localhost:3306/ord>models.py
+
+insert into users values();
+insert into users (nickname,openid,unionid,session_key, address, phone)values("Jhon","123456","1234567","er4t5s","广州", "15521192220");
+delete from users where id=1,2;
+select substring(MD5(RAND()),1,5)
+create table user(id char(5) default substring(MD5(RAND()),1,5));
+
+insert into items (lau_usId, item_name,  pass_id, item_type,  contacts, start_time, end_time, item_address, text_info) values("123456", "item_name", "1se4s", "1", "contacts",
+     "2011-1-1 00:00:01", "2013-1-1 00:00:01", "item_address", "text_info");
