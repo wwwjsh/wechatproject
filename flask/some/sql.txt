@@ -47,24 +47,42 @@ CONSTRAINT depend FOREIGN KEY(itemId) REFERENCES items(item_id)
 
 create table orders
 (
+ord_num int(8) unsigned AUTO_INCREMENT,#预约订单的单号
+ord_price int unsigned DEFAULT 0,#价格
+pay_status enum("0","1") DEFAULT "0",#支付状态
+)
+create table orderinfo
+(
 ord_id int(8) unsigned AUTO_INCREMENT, #预约任务号id
-ord_num int(5) unsigned NOT NULL,#预约订单的单号
+ordNum int(5) unsigned NOT NULL,#预约订单的单号
 objId int(5) unsigned, #被预定的对象的id
 ord_usId int(5) unsigned,#预约的用户
 queue_num int(3) DEFAULT -1,#分发的队号
 place_time timestamp default NOW(),#提交预约时间
 PRIMARY KEY(ord_id),
 CONSTRAINT orded_obj FOREIGN KEY(objId) REFERENCES ord_objects(obj_id),
-CONSTRAINT orded_us FOREIGN KEY(ord_usId) REFERENCES users(openid)
+CONSTRAINT orded_us FOREIGN KEY(ord_usId) REFERENCES users(openid),
+CONSTRAINT orded_num FOREIGN KEY(ordNum) REFERENCES orders(ord_num)
 );
 
 sqlacodegen mysql://root:123456@localhost:3306/ord>models.py
 
 insert into users values();
-insert into users (nickname,openid,unionid,session_key, address, phone)values("Jhon","123456","1234567","er4t5s","广州", "15521192220");
+insert into users (nickname,openid,unionid,address, phone)values("Jhon","123456","er4t5s","广州", "15521192220");
+insert into users (nickname,openid,unionid,address, phone)values("","oGZUI0egBJY1zhBYw2KhdUfwVJJE","er4t5s","广西", "15521192220");
 delete from users where id=1,2;
 select substring(MD5(RAND()),1,5)
 create table user(id char(5) default substring(MD5(RAND()),1,5));
 
 insert into items (lau_usId, item_name,  pass_id, item_type,  contacts, start_time, end_time, item_address, text_info) values("123456", "item_name", "1se4s", "1", "contacts",
      "2011-1-1 00:00:01", "2013-1-1 00:00:01", "item_address", "text_info");
+
+select ord_objects.obj_id, items.pass_id from ord_objects, items, orderinfo, orders where orders.ord_usId=123456;
+
+select orders.ord_usId, ord_objects.* , items.*  from ord_objects, items, orders where orders.ord_usId=123456;
+select * from ord_objects, items, (select orders.ord_usId as openid from orders where openid=123456);
+select orders.ord_usId, items.*  from ord_objects, items, orders where orders.ord_usId=123456;
+select * from items where items.item_id =
+(select ord_objects.itemId from ord_objects where ord_objects.obj_id =
+(select orderinfo.objId from orderinfo where orderinfo.ordNum = (
+select orders.ord_num from orders where orders.ord_usId=123456)));

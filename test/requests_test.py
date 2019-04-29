@@ -2,6 +2,7 @@ import requests
 import json
 url = "http://127.0.0.1:5000/launchActivity"
 openid = "123456"
+token = '7376b0ce15ca4502dd626cf16852c8f6'
 item_name = "天玄"
 item_type = "1"
 contacts = "1354852"
@@ -12,7 +13,7 @@ text_info = "记得来"
 ord_objects = [{"obj_num": 1, "obj_name": "一号桌", "minOrd_time": 60, "ordable_sum": "30"}]
 # #ord_objects: [{obj_num: int(3), obj_name: varchar(15), minOrd_time: time, ordable_sum: int(3)}]}
 data = {
-"lau_usId" : json.dumps(openid),
+"token" : json.dumps(token),
 "item_name" : json.dumps(item_name),
 "item_type" :  json.dumps(item_type),
 "contacts" :  json.dumps(contacts),

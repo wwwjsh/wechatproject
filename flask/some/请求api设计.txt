@@ -1,0 +1,238 @@
+
+wx.request({
+          url: 'https://我的后台服务器网址/score',
+          data: {
+            acc_nbr:JSON.stringify(acc_nbr),
+            grade1: JSON.stringify(grade1),  //将数据格式转为JSON
+            grade2: JSON.stringify(grade2),  //将数据格式转为JSON
+            grade3: JSON.stringify(grade3),  //将数据格式转为JSON
+            txt1:JSON.stringify(txt1),
+            txt2:JSON.stringify(txt2),
+            txt3:JSON.stringify(txt3)
+          },
+          method: "POST",
+          header: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'chartset': 'utf-8'
+          }
+
+#发起
+wx.request({
+          url: 'https://我的后台服务器网址/launchActivity',
+          data: {
+            lau_usId:JSON.stringify(openid),
+            item_name:JSON.stringify(item_name),
+            item_type: JSON.stringify(item_type),  //将数据格式转为JSON
+            contacts: JSON.stringify(contacts),  //将数据格式转为JSON
+            start_time: JSON.stringify(start_time),  //将数据格式转为JSON
+            end_time:JSON.stringify(end_time),
+            item_address:JSON.stringify(item_address),
+            text_info:JSON.stringify(text_info),
+            ord_objects:JSON.stringify(ord_objects),  //可被预定对象ord_objects:[{obj_num:int(3),obj_name:varchar(15),minOrd_time:time,ordable_sum:int(3) 预定类型为1}]
+          },
+          method: "POST",
+          header: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'chartset': 'utf-8'
+          }
+          return {pass_id:passid} 项目口令
+#请求<加入项目>的页面信息
+wx.request({
+          url: 'https://我的后台服务器网址/joininfo/'+pass_id,
+          data: {
+
+            wd:pass_id, #预定项目号
+            },
+          method: "GET",
+          header: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'chartset': 'utf-8'
+          }
+          返回的页面数据
+          {
+  "contacter": "Jhon", 联系人
+  "contacts": "1354852",  联系方式
+  "end_time": "Sun, 01 Jan 2012 17:00:00 GMT", 结束时间
+  "img_info": [], 图片信息
+  "item_address": "\u5e7f\u5dde", 项目地址
+  "item_name": "\u5929\u7384", 项目名称
+  "item_type": "1", #项目类型 1 排队 2预定
+  "lau_time": "\"2019-04-22 15:08:50\"", #项目发起时间
+  "obj_data": [
+    {
+      "obj": [
+        {
+          "minOrd_time": 60, #最小预定时间
+          "obj_id": 1, #对象的唯一id
+          "obj_name": "\u4e00\u53f7\u684c", #对象名称
+          "residue": 30 #该对象剩余可预定
+        },
+        {
+          "minOrd_time": 60,
+          "obj_id": 4,
+          "obj_name": "\u4e00\u53f7\u684c",
+          "residue": 30
+        }
+      ],
+      "start_time": "[\"2012-01-01 14:00:00\"]"
+    },
+    {
+      "obj": [
+        {
+          "minOrd_time": 60,
+          "obj_id": 2,
+          "obj_name": "\u4e00\u53f7\u684c",
+          "residue": 29
+        },
+        {
+          "minOrd_time": 60,
+          "obj_id": 5,
+          "obj_name": "\u4e00\u53f7\u684c",
+          "residue": 30
+        }
+      ],
+      "start_time": "[\"2012-01-01 15:00:00\"]"
+    },
+    {
+      "obj": [
+        {
+          "minOrd_time": 60,
+          "obj_id": 3,
+          "obj_name": "\u4e00\u53f7\u684c",
+          "residue": 29
+        },
+        {
+          "minOrd_time": 60,
+          "obj_id": 6,
+          "obj_name": "\u4e00\u53f7\u684c",
+          "residue": 30
+        }
+      ],
+      "start_time": "[\"2012-01-01 16:00:00\"]"
+    }
+  ],
+  "start_time": "\"2012-01-01 14:00:00\"",
+  "text_info": "\u8bb0\u5f97\u6765"
+}
+#加入项目
+wx.request({
+          url: 'https://我的后台服务器网址/joinAcitvity',
+          data: {
+            ord_usId:JSON.stringify(openid),
+            ord_price:JSON.stringify(ord_price),
+            objId: JSON.stringify(objId),  //预定对象的id号 唯一指定,是一个列表
+            },
+          method: "POST",
+          header: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'chartset': 'utf-8'
+          }
+          返回队号，成功信息
+#登录
+wx.login({
+  success(res) {
+    if (res.code) {
+      // 发起网络请求
+      wx.request({
+        url: 'https://后台服务器/logins',
+        data: {
+          code: JSON.stringify(res.code)
+        }
+      })
+    } else {
+      console.log('登录失败！' + res.errMsg)
+    }
+  }
+})
+    #更新用户的头像和名字
+    wx.getUserInfo({
+          withCredentials:true,
+
+          success(res) {
+            const userInfo = res.userInfo
+            const nickName = userInfo.nickName
+            const avatarUrl = userInfo.avatarUrl
+            const gender = userInfo.gender // 性别 0：未知、1：男、2：女
+            const province = userInfo.province
+            const city = userInfo.city
+            const country = userInfo.country
+            wx.request({
+                      url: 'https://我的后台服务器网址/userinfo',
+                      data: {
+                        encryptedData: JSON.stringify(encryptedData),
+                        token : JSON.stringify(token),//预定对象的id号 唯一指定,是一个列表
+                        },
+                      method: "POST",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
+          }
+    })
+
+
+
+#用户查看自己发起的活动
+wx.request({
+                      url: 'https://我的后台服务器网址/iteminfo/Mylaunch',
+                      data: {
+                        token = JSON.stringify(token)
+                        },
+                      method: "POST",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
+                    wx.request({
+                      url: 'https://我的后台服务器网址/iteminfo/Mylauch/detail',
+                      data: {
+                        token : JSON.stringify(token),
+                        wd : JSON.stringify(pass_id)
+                        },
+                      method: "GET",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
+#用户查看自己参加的活动
+wx.request({
+                      url: 'https://我的后台服务器网址/iteminfo/Myjoinedl',
+                      data: {
+                        token : JSON.stringify(token),
+                        },
+                      method: "GET",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
+wx.request({
+                      url: 'https://我的后台服务器网址/iteminfo/Myjoined/detail',
+                      data: {
+                        token : JSON.stringify(token),
+                        wd : JSON.stringify(pass_id)
+                        },
+                      method: "GET",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
+
+#用户修改自己的信息 只能修改地址和联系电话
+wx.request({
+                      url: 'https://我的后台服务器网址/user/update',
+                      data: {
+                        token : JSON.stringify(token),
+                        'address': JSON.stringify(address), //为空表示不修改
+                        'phone': JSON.stringify(phone)
+                        },
+                      method: "POST",
+                      header: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'chartset': 'utf-8'
+                      }
+                    })
