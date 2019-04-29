@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 '''数据库模型文件'''
 app = Flask(__name__)
 # url的格式为：数据库的协议：//用户名：密码@ip地址：端口号（默认可以不写）/数据库名
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123456@localhost/ord?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:123456@localhost/ord?charset=utf8"
 #设置每次请求结束后会自动提交数据库中的改动
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 

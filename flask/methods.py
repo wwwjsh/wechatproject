@@ -67,7 +67,7 @@ def try_db_commit(ins):
 
 # 获取用户的opendid和session_key，openid
 def get_user(js_code, app_id, secret):
-    #执行测试 所用的数据
+    # 执行测试 所用的数据
     # return {'openid': 'bbbUI0egBJY1zhBYw2KhdUfwVJJE', 'session_key': 'tiihtNczf5v6AKRyjwEUhQ==', 'errcode': 0}
     req_params = {
         "appid": app_id, # 小程序ID

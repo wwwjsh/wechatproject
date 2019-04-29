@@ -105,28 +105,32 @@ def myjoined_itemdetail():
     @token.checkbytoken
     def decorated(data):
         pass_id = data.get('wd', 0)
-        myitem = db.session.query(Item).filter(Item.pass_id == pass_id).first()
-        if myitem:
-            # 请求的项目的信息返回
-            myitem_detaildict = {'item_name': myitem.item_name, 'pass_id': myitem.pass_id, 'item_type': myitem.item_type,
-                                'contacts': myitem.contacts, 'start_time': json.dumps(myitem.start_time, cls=DateEncoder),
-                                'end_time': json.dumps(myitem.end_time, cls=DateEncoder), 'item_address': myitem.item_address,
-                                'text_info':myitem.text_info, 'img_info': myitem.img_info, 'logic_del': myitem.logic_del,
-                                'lau_time': myitem.lau_time}
+        if pass_id:
+            myitem = db.session.query(Item).filter(Item.pass_id == pass_id).first()
+            if myitem:
+                # 请求的项目的信息返回
+                myitem_detaildict = {'item_name': myitem.item_name, 'pass_id': myitem.pass_id, 'item_type': myitem.item_type,
+                                    'contacts': myitem.contacts, 'start_time': json.dumps(myitem.start_time, cls=DateEncoder),
+                                    'end_time': json.dumps(myitem.end_time, cls=DateEncoder), 'item_address': myitem.item_address,
+                                    'text_info':myitem.text_info, 'img_info': myitem.img_info, 'logic_del': myitem.logic_del,
+                                    'lau_time': myitem.lau_time}
 
-            myorded_objects = db.session.query(OrdObject).filter(OrdObject.obj_id.in_
-                                                  (db.session.query(Orderinfo.objId).filter(Orderinfo.ordNum.in_
-                                                                                                     (db.session.query(Order.ord_num).filter(Order.ord_usId == data['token'].get_openid())
-                                                                                                      ))), OrdObject.item == myitem).all()
-            #本项目中我预定了的对象
-            ord_objectlist = [{'obj_id': myorded_object.obj_id,'obj_num': myorded_object.obj_num,
-                               'obj_name': myorded_object.obj_name, 'minOrd_time': myorded_object.minOrd_time,
-                               'startOrd_time': myorded_object.ordable_sum, 'residue': myorded_object.residue,
-                               'logic_del': myorded_object.logic_del
-                               }for myorded_object in myorded_objects]
-            info = {'data':{'item': myitem_detaildict, 'myobj': ord_objectlist}, "errNum": 0, "errMsg": "success"}
-            return jsonify(info)
+                myorded_objects = db.session.query(OrdObject).filter(OrdObject.obj_id.in_
+                                                      (db.session.query(Orderinfo.objId).filter(Orderinfo.ordNum.in_
+                                                                                                         (db.session.query(Order.ord_num).filter(Order.ord_usId == data['token'].get_openid())
+                                                                                                          ))), OrdObject.item == myitem).all()
+                #本项目中我预定了的对象
+                ord_objectlist = [{'obj_id': myorded_object.obj_id,'obj_num': myorded_object.obj_num,
+                                   'obj_name': myorded_object.obj_name, 'minOrd_time': myorded_object.minOrd_time,
+                                   'startOrd_time': myorded_object.ordable_sum, 'residue': myorded_object.residue,
+                                   'logic_del': myorded_object.logic_del
+                                   }for myorded_object in myorded_objects]
+                info = {'data':{'item': myitem_detaildict, 'myobj': ord_objectlist}, "errNum": 0, "errMsg": "success"}
+                return jsonify(info)
+            else:
+                info = {"errNum": -1, "errMsg": "itemError."}
+                return jsonify(info)
         else:
-            info = {"errNum": -1, "errMsg": "itemError."}
+            info = {"errNum": -1, "errMsg": 'keyError.'}
             return jsonify(info)
     return decorated(request)
