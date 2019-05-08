@@ -3,37 +3,61 @@
 from flask import Blueprint, json, request, jsonify
 from ord_models import *
 from methods import DateEncoder, Token, try_db_commit
+import datetime
 #创建蓝图
 join = Blueprint('join', __name__)
 token = Token()
 
-@join.route('/joinInfo', methods=['GET'])
+@join.route('/joinInfo', methods=['POST'])
 def join_info():
-    pass_id = request.args['wd']
+    pass_id = request.get_json().get("wd", 0)
     #查找对应的项目
-    #User.query.filter(User.name!='wang').all()
-    item = Item.query.filter_by(pass_id=pass_id).first()
-    if item:
-        lau_user = User.query.filter_by(openid=item.lau_usId).first()
-        if lau_user:
-            obj_timelist = OrdObject.query.filter_by(itemId= item.item_id).with_entities(OrdObject.startOrd_time).distinct().order_by(OrdObject.startOrd_time).all()
-            obj_data = [{"start_time":json.dumps(obj_time,cls=DateEncoder),
-                         "obj": [{"obj_id": i.obj_id,"obj_name": i.obj_name,
-                                  "minOrd_time": i.minOrd_time,"residue": i.residue}
-                                 for i in OrdObject.query.filter_by(startOrd_time=obj_time).all()]}
-                        for obj_time in obj_timelist]
+    if pass_id:
+        #User.query.filter(User.name!='wang').all()
+        item = Item.query.filter_by(pass_id=pass_id).first()
+        if item:
+            lau_user = User.query.filter_by(openid=item.lau_usId).first()
+            if lau_user:
+                obj_time_distin = db.session.query(OrdObject.startOrd_time).filter(OrdObject.itemId == item.item_id).distinct().order_by(OrdObject.startOrd_time).all()
+                # print(obj_time_distin)
+                # print(obj_time_distin.all()[0].startOrd_time)
+                # obj_timelist = OrdObject.query.filter_by(itemId= item.item_id).with_entities(OrdObject.startOrd_time).distinct().order_by(OrdObject.startOrd_time)
+                obj_data = [{"start_time": obj_time[0],
+                             "obj": [{"obj_id": i.obj_id,"obj_name": i.obj_name,
+                                      "minOrd_time": i.minOrd_time,"residue": i.residue}
+                                     for i in db.session.query(OrdObject).filter(OrdObject.startOrd_time == obj_time,
+                                                                                 OrdObject.itemId == item.item_id).all()]}
+                            for obj_time in obj_time_distin]
 
-            datadict = {"item_name": item.item_name, "item_type": item.item_type, "start_time": json.dumps(item.start_time, cls=DateEncoder),
-                    "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": lau_user.nickname, "contacts": item.contacts,
-                    "item_address": item.item_address, "text_info": item.text_info, "img_info": [],
-                    "lau_time": json.dumps(item.lau_time, cls=DateEncoder), "obj_data": obj_data}
+                date_list = []
+                dealed_data = []
+                for data in obj_data:
+                    date = [data['start_time'].year, data['start_time'].month, data['start_time'].day]
+                    data['start_time'] = [ data['start_time'].hour, data['start_time'].minute]  # 修改开始时间格式
+                    # print(date) # 返回日期列表
+                    if date not in date_list:
+                        date_list.append(date)
+                        dealed_data.append({'date': date, 'objs': [data]})
+                    else:
+                        for i in range(len(dealed_data)):
+                            if dealed_data[i].get('date', 0) == date:
+                                dealed_data[i]['objs'].append(data)
 
-            info = {'data': datadict, "errNum": 0, "errMsg": "success"}
-            return jsonify(info)
-        else:
-            info = {"errNum": -1, "errMsg": "lau_userError"}
-            return jsonify(info)
+                datadict = {"item_name": item.item_name, "item_type": item.item_type, "pass_id": item.pass_id, "start_time": json.dumps(item.start_time, cls=DateEncoder),
+                        "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": lau_user.nickname, "contacts": item.contacts,
+                        "item_address": item.item_address, "text_info": item.text_info, "img_info": item.img_info,
+                        "lau_time": json.dumps(item.lau_time, cls=DateEncoder), "obj_data": dealed_data}
+                # print(obj_data[0]['start_time'][0].year) # 时间对象返回年
+                print(dealed_data)
+                info = {'data': datadict, "errNum": 0, "errMsg": "success"}
+                db.session.close()
+                return jsonify(info)
+            else:
+                db.session.close()
+                info = {"errNum": -1, "errMsg": "lau_userError"}
+                return jsonify(info)
     else:
+        db.session.close()
         info = {"errNum": -1, "errMsg": "pass_idError"}
         return jsonify(info)
 
@@ -80,6 +104,7 @@ data = {
                 if flag == 1:
                     # 只要有一个对象不能预定 全都不预定
                     db.session.rollback()
+                    db.session.close()
                     info = {"errNum": -1, "errMsg": "ObjresidueError."}
                     return jsonify(info)
 
@@ -88,17 +113,21 @@ data = {
                         # 加入订单详情信息表
                         db.session.add_all(ordinfos)
                         db.session.commit()
+                        db.session.close()
                         info = {"errNum": 0, "errMsg": "success"}
                         return jsonify(info)
                     except:
-
+                        db.session.close()
                         info = {"errNum": -1, "errMsg": "dbError."}
                         return jsonify(info)
             except:
+                db.session.close()
                 info = {"errNum": -1, "errMsg": "InvalidError."}
                 #返回失败
                 return jsonify(info)
         else:
+            db.session.close()
             info = {"errNum": -1, "errMsg": "keyError"}
             return jsonify(info)
     return decorated(request)
+

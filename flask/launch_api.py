@@ -107,11 +107,12 @@ def upload_itemimg():
                     upload_path = os.path.join(basepath, 'static/itemimg', secure_filename(file.filename))  # 注意：没有的文件夹一定要先创建，不然会提示没有该路径
                     # upload_path = os.path.join(basepath, 'static/images','test.jpg')  #注意：没有的文件夹一定要先创建，不然会提示没有该路径
                     file.save(upload_path)
-                    print(upload_path)
+
                     # 使用Opencv转换一下图片格式和名称 转换成jpg
-                    # img = cv2.imread(upload_path)
+                    img = cv2.imread(upload_path)
                     filename = generate_random_str(12) + '.jpg'# 十二位字符串
-                    # cv2.imwrite(os.path.join(basepath, 'static/itemimg', filename), img)
+                    cv2.imwrite(os.path.join(basepath, 'static/itemimg', filename), img, [int(cv2.IMWRITE_JPEG_QUALITY),70])
+                    print(img)
                     item.img_info = filename
                     try_db_commit(item)
                     info = {"errNum": 0, "errMsg": "success"}
@@ -123,4 +124,5 @@ def upload_itemimg():
             info = {"errNum": -1, "errMsg": "itemError."}
             return jsonify(info)
     return decorated(json.loads(request.values.get('formData')))
+
 

@@ -53,7 +53,5 @@ def main():
 
     print(json.loads(thing, object_hook=object_hook))
 
-
 if __name__ == '__main__':
-
     main()

@@ -13,7 +13,8 @@ login = Blueprint('login', __name__)
 def sign_in():
     json_data = request.get_json()
     js_code = json_data['code']
-    user_session = get_user(js_code, appid, secret) # 字典类型
+    user_session = get_user(js_code)  # 字典类型
+    print(user_session)
     #0 请求成功
     if user_session["errcode"] == 0:
         tokenobj = Token(openid=user_session["openid"], session_key=user_session["session_key"])
@@ -28,7 +29,7 @@ def sign_in():
         return jsonify(info)
     #请求失败
     elif user_session["errcode"] != 0:
-        info = {"errNum": -1, "errMsg": "itemError.", 'WxerrMsg': user_session["errmsg"]}
+        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session["errmsg"]}
         return jsonify(info)
 
 token = Token()

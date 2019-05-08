@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 '''数据库模型文件'''
 app = Flask(__name__)
 # url的格式为：数据库的协议：//用户名：密码@ip地址：端口号（默认可以不写）/数据库名
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:123456@localhost/ord?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123456@localhost/ord?charset=utf8"
 #设置每次请求结束后会自动提交数据库中的改动
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
@@ -69,10 +69,12 @@ class Order(db.Model):
 
     ord_num = db.Column(db.INTEGER, primary_key=True)
     ord_usId = db.Column(db.ForeignKey('users.openid'), nullable=False, index=True)
+    # itemId = db.Column(db.ForeignKey('items.item_id'),  nullable=False, index=True)
     ord_price = db.Column(db.INTEGER, server_default=db.text("'0'"))
     pay_status = db.Column(db.Enum('0', '1'), server_default=db.text("'0'"))
     place_time = db.Column(db.TIMESTAMP, server_default=db.text("CURRENT_TIMESTAMP"))
-
+    # logic_del = db.Column(db.INTEGER, server_default=db.text("'1'"))
+    # item = db.relationship('Item') 用户取消加入活动 需要添加一个外键 通过连接修改该字段 查询信息自己加入的时候 使用两个子链接 再进行内连接
     user = db.relationship('User')
 
 class Orderinfo(db.Model):
@@ -83,6 +85,7 @@ class Orderinfo(db.Model):
     objId = db.Column(db.ForeignKey('ord_objects.obj_id'),  nullable=False, index=True)
     queue_num = db.Column(db.INTEGER, server_default=db.text("'-1'"))
     ord_object = db.relationship('OrdObject')
+
     order = db.relationship('Order')
 
     db.create_all()
@@ -96,6 +99,7 @@ if __name__ == '__main__':
     # db.session.commit()
     # db.session.rollback()
     # times2 = db.session.query(Time).filter(id != 1).all()
+
     '''s = db.session.query(OrdObject,Item).\
         filter(Order.ord_usId=='123456').\
         all()

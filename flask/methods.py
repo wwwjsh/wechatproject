@@ -14,8 +14,8 @@ from functools import wraps
 from ord_models import db
 
 # 配置小程序appid和secret
-appid = 'wx4f4bc4dec97d474b'
-secret = '0jhgjalk'
+appid = 'wx64118b44bbd3bfa3'
+secret = '284ae53ebc924e862f12fb1e71d9a941'
 
 #连接redis数据库，host port password 字符/字节存入 选择字符存入操作
 r = redis.Redis(host="127.0.0.1", port=6379, password="123456qw@", decode_responses=True)
@@ -44,6 +44,9 @@ class WXBizDataCrypt:
 
     def _unpad(self, s):
         return s[:-ord(s[len(s)-1:])]
+# 日期这转化成列表
+def datetime_to_list(datetime):
+    return [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute]
 
 #日期类型转换成json数据
 class DateEncoder(json.JSONEncoder):
@@ -66,9 +69,9 @@ def try_db_commit(ins):
             return jsonify(info)
 
 # 获取用户的opendid和session_key，openid
-def get_user(js_code, app_id, secret):
+def get_user(js_code, app_id=appid, secret=secret):
     # 执行测试 所用的数据
-    # return {'openid': 'bbbUI0egBJY1zhBYw2KhdUfwVJJE', 'session_key': 'tiihtNczf5v6AKRyjwEUhQ==', 'errcode': 0}
+    return {'openid': 'bbbUI0egBJY1zhBYw2KhdUfwVJJE', 'session_key': 'tiihtNczf5v6AKRyjwEUhQ==', 'errcode': 0}
     req_params = {
         "appid": app_id, # 小程序ID
         "secret": secret, # 小程序 secret
@@ -106,9 +109,8 @@ class Token():
         def decorated(data):
             data = data if type(data)==dict else data.get_json()
 
-            if data and data.get('token',0):
+            if data and data.get('token', 0):
                 self.pswd = data['token']
-
                 if self.check():
                     data['token'] = self
                     return func(data)
