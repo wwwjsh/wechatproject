@@ -36,6 +36,7 @@ class Item(db.Model):
     lau_usId = db.Column(db.ForeignKey('users.openid'),  nullable=False, index=True)
     item_type = db.Column(db.Enum('1', '2'), nullable=False)
     contacts = db.Column(db.String(20), nullable=False)
+    contacter = db.Column(db.String(20))
     start_time = db.Column(db.TIMESTAMP, nullable=False)
     end_time = db.Column(db.TIMESTAMP, nullable=False)
     item_address = db.Column(db.String(60))

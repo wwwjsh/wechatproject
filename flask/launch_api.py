@@ -11,62 +11,120 @@ from werkzeug.utils import secure_filename
 # 创建蓝图
 launch = Blueprint('launch', __name__)
 token = Token()
+def date_iterator(start_date, end_date):
+    '''日期列表迭代器 存放每一个时间段里面的迭代器对象'''
+    start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+    if start_date > end_date:
+        raise Exception('start_date bigger than end_date')
+    date = start_date
+    while date <= end_date:
+        yield date
+        date = date + datetime.timedelta(days=1)
+
+def get_times_list(start_time, end_time, minOrd_time):
+    '''生成一个对象 的一个时间段的时间列表'''
+    start = datetime.datetime.strptime(start_time, '%H:%M')
+    end = datetime.datetime.strptime(end_time, '%H:%M')
+    if start > end:
+        raise Exception('start_date bigger than end_date')
+    timelist = []
+    time = start
+    while time < end:
+        timelist.append(time)
+        time = time + datetime.timedelta(minutes=minOrd_time)
+    return timelist
+
+def get_start_end(timetable):
+    '''获取时间表的开始时间， 结束时间 作为该项目字段名'''
+    min_datetime = datetime.datetime.strptime(timetable[0]['start_date']+' '+timetable[0]['start_time'], '%Y-%m-%d %H:%M')
+    max_datetime = datetime.datetime.strptime(timetable[0]['end_date']+' '+timetable[0]['end_time'], '%Y-%m-%d %H:%M')
+    for i in timetable:
+        start = datetime.datetime.strptime(i['start_date'] + ' ' + i['start_time'], '%Y-%m-%d %H:%M')
+        end = datetime.datetime.strptime(i['end_date'] + ' ' + i['end_time'], '%Y-%m-%d %H:%M')
+        if start < min_datetime:
+            min_datetime = start
+        if end > max_datetime:
+            max_datetime = end
+    return (min_datetime, max_datetime)
 
 # 用户发起活动
 @launch.route('/launchActivity', methods=['POST'])
 def lau_item():
+    '''发起活动 相关函数参考some/test.py'''
     # json.loads(request.values.get("txt3"))
     # items表添加元素
     @token.checkbytoken
     def decorated(data):
-
         lau_usId = data['token'].get_openid()
-        item_name = data['data']["item_name"]
+        item_name = data['data'].get("item_name", '')
         pass_id = generate_random_str(5)
-        item_type = data['data']["item_type"]
-        contacts = data['data']["contacts"]
-        start_time = data['data']["start_time"]
-        end_time = data['data']["end_time"]
-        item_address = data['data']["item_address"]
-        text_info = data['data']["text_info"]
-        ord_objects = data['data']["ord_objects"]
+        item_type = data['data'].get("item_type", 2)
+        contacts = data['data'].get("contacts", 0)
+        contacter = data['data'].get("contacter", 0)
+        timetable = data['data'].get("timetable", [])
+        item_address = data['data'].get("address", '')
+        text_info = data['data'].get("text_info", '')
+        ord_objects = data['data'].get("objs", '')
         '''ord_objects:[{obj_num:int(3),obj_name:varchar(15),minOrd_time:int单位分钟,ordable_sum:预定类型为1 int(3) }]'''
-        try:
-            objlist = [] # 预定对象列表
-            newItem = Item(lau_usId=lau_usId, item_name=item_name, pass_id=pass_id, item_type=item_type, contacts=contacts,
-                       start_time=start_time[0], end_time=end_time[-1], item_address=item_address, text_info=text_info)
-            # try_db_commit(newItem)
-            db.session.add(newItem)
-            db.session.flush()
-                # print([start_time,end_time])
-            for i in range(len(start_time)):
-                a_start = start_time[i]
-                a_end = end_time[i]
-                for object in ord_objects:
-                    # 遍历所有预定对象，例如五张桌子，遍历每张桌子
-                    time = datetime.datetime.strptime(a_start, '%Y-%m-%d %H:%M')
-                    end = datetime.datetime.strptime(a_end, '%Y-%m-%d %H:%M')
-                    print(time,end)
-                    while time < end:
-                        # 切割小时间段
-                        newObj = OrdObject(itemId=newItem.item_id, obj_num=object["obj_num"], obj_name=object["obj_name"],
-                                           minOrd_time=object["minOrd_time"], startOrd_time=str(time), ordable_sum=object["ordable_sum"], residue=object["ordable_sum"])
-                        objlist.append(newObj)
-                        time = time + datetime.timedelta(minutes=object["minOrd_time"])
-                    # ord_objects: [{obj_num: int(3), obj_name: varchar(15), minOrd_time: time, ordable_sum: int(3)}]}
-            try:
-                db.session.add_all(objlist)
-                db.session.commit()
-                # print(type(objlist))
-                info = {"errNum": 0, "errMsg": "success", "pass_id": pass_id}
-                return jsonify(info)
-            except:
-                info = {"errNum": -1, 'errMsg': "objError!"}
-                return jsonify(info)
-        except:
-            info = {"errNum": -1, 'errMsg': "itemError!"}
-            return jsonify(info)
+        '''time:[{ start_date: '2012-05-08', end_date: '2012-05-10', start_time: '14:00', end_time: '16:00' }]'''
+        # 非空验证
+        if (item_name and item_address and text_info and ord_objects and contacts and timetable):
+            # 生成日期列表迭代器dateIterator 迭代之后的结果date:[['2012-05-08', '2012-05-09', '2012-05-10']] 一项表示一个日期区间的切分结果
+            dateIterator = []
+            for i in timetable:
+                dateIterator.append(date_iterator(i['start_date'], i['end_date']))
 
+            '''遍历寻找最预先的日期 和最终日期'''
+            start_time, end_time = get_start_end(timetable)
+
+            # 设定项目的开始时间和结束时间 数据库新建项目
+            print(db.session.query(Item).filter(Item.pass_id == pass_id))
+            # while db.session.query(Item).filter(Item.pass_id == pass_id).first():
+            #     # 防止pass_id重复
+            #     pass_id = generate_random_str(5)
+            try:
+                new_item = Item(lau_usId=lau_usId, item_name=item_name, pass_id=pass_id, item_type=item_type, contacts=contacts,
+                               start_time=start_time, end_time=end_time, item_address=item_address, text_info=text_info)
+                db.session.add(new_item)
+                db.session.flush()
+                # 根据每个对象的最小预定时间 划分time中每个时间段对应的时间生成时间关系矩阵
+                # 根据预定对象信息生成 时间列表  timelist = [[[14；00, 15:00],[根据第一个可预订对象， time第二个时间段切分的开始时间],...],[第二个可预订对象根据若干个time时间段的切分...]]
+                timelist = []
+                for obj in ord_objects:
+                    obj_time = []
+                    for i in timetable:
+                        obj_time.append(get_times_list(i['start_time'], i['end_time'], obj['minOrd_time']))
+                    timelist.append(obj_time)
+                try:
+                    print(timelist)
+                    print(dateIterator)
+                    # 生成根据多个开始时间段, 原来的obj信息，生成预定对象存入数据库
+                    for i in range(len(timetable)):
+                        for date in dateIterator[i]: # 遍历第i个时间段包含的日期
+                            for obj_index in range(len(ord_objects)):
+                                for time in timelist[obj_index][i]:
+                                    startOrd_time = date + datetime.timedelta(hours=time.hour,minutes=time.minute)
+                                    new_obj = OrdObject(itemId=new_item.item_id, obj_num=ord_objects[obj_index]["obj_num"], obj_name=ord_objects[obj_index]["obj_name"],
+                                                        minOrd_time=ord_objects[obj_index]["minOrd_time"], startOrd_time=str(startOrd_time),
+                                                        ordable_sum=ord_objects[obj_index]["ordable_sum"], residue=ord_objects[obj_index]["ordable_sum"])
+                                    db.session.add(new_obj)
+                    db.session.commit()
+                    db.session.close()
+                    info = {"errNum": 0, "errMsg": "success", "pass_id": pass_id}
+                    return jsonify(info)
+                except:
+                    db.session.rollback()
+                    db.session.close()
+                    info = {"errNum": -1, 'errMsg': "objError!"}
+                    return jsonify(info)
+            except:
+                db.session.close()
+                info = {"errNum": -1, 'errMsg': "itemError!"}
+                return jsonify(info)
+        else:
+            info = {"errNum": -1, 'errMsg': "formError!"}
+            return jsonify(info)
     return decorated(request)
 
 
