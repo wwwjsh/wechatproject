@@ -15,7 +15,7 @@ from ord_models import db
 
 # 配置小程序appid和secret
 appid = 'wx64118b44bbd3bfa3'
-secret = '284ae53ebc924e862f12fb1e71d9a941'
+secret = '9ca7dc56b74663931643555302ef90e5'
 
 #连接redis数据库，host port password 字符/字节存入 选择字符存入操作
 r = redis.Redis(host="127.0.0.1", port=6379, password="123456qw@", decode_responses=True)
@@ -71,16 +71,18 @@ def try_db_commit(ins):
 # 获取用户的opendid和session_key，openid
 def get_user(js_code, app_id=appid, secret=secret):
     # 执行测试 所用的数据
-    return {'openid': 'bbbUI0egBJY1zhBYw2KhdUfwVJJE', 'session_key': 'tiihtNczf5v6AKRyjwEUhQ==', 'errcode': 0}
+    # return {'openid': 'bbbUI0egBJY1zhBYw2KhdUfwVJJE', 'session_key': 'tiihtNczf5v6AKRyjwEUhQ==', 'errcode': 0}
+    url = ' https://api.weixin.qq.com/sns/jscode2session'
     req_params = {
         "appid": app_id, # 小程序ID
         "secret": secret, # 小程序 secret
         "js_code": js_code,
         "grant_type": 'authorization_code'
     }
-    req_resuLt = requests.get('https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code',
-                              params=req_params, timeout=3, verify=False)
-    #把返回的json数据转化成dict,返回字典类型
+
+    req_resuLt = requests.get(url=url, params=req_params, timeout=3, verify=False)
+
+    # 把返回的json数据转化成dict,返回字典类型
     return req_resuLt.json()
 
 
