@@ -57,7 +57,7 @@ def mylaunch_itemdetail():
             if item:
                 lauser = db.session.query(User).filter(User.openid == data['token'].get_openid()).first()
                 item_detaildict = {'item_name': item.item_name, 'pass_id': item.pass_id, 'item_type': item.item_type,
-                                   'contacter': lauser.nickname,
+                                   'contacter': item.contacter if item.contacter else lauser.nickname,
                                 'contacts': item.contacts, 'start_time': datetime_to_list(item.start_time),
                                 'end_time': datetime_to_list(item.end_time), 'item_address': item.item_address,
                                 'text_info':item.text_info, 'img_info': item.img_info, 'page_show': item.page_show, 'logic_del': item.logic_del}
@@ -127,7 +127,7 @@ def myjoined_itemdetail():
                                                                     Order.ord_usId == data['token'].get_openid()).all()
                 # 请求的项目的信息返回
                 myitem_detaildict = {'item_name': myitem.item_name, 'pass_id': myitem.pass_id, 'item_type': myitem.item_type,
-                                    'contacts': myitem.contacts, 'contacter': lauser.nickname,
+                                    'contacts': myitem.contacts, 'contacter': myitem.contacter if myitem.contacter else lauser.nickname,
                                      'start_time': [myitem.start_time.year, myitem.start_time.month, myitem.start_time.day, myitem.start_time.hour, myitem.start_time.minute] ,
                                     'end_time': [myitem.end_time.year, myitem.end_time.month, myitem.end_time.day, myitem.end_time.hour, myitem.end_time.minute],
                                      'item_address': myitem.item_address, 'cancel_status': 1 if [i for i in orders_cancel_del if i[0] != 0] else 0,

@@ -108,6 +108,7 @@ class Token():
         @wraps(func)
         def decorated(data):
             data = data if type(data)==dict else data.get_json()
+            print(data)
 
             if data and data.get('token', 0):
                 self.pswd = data['token']
@@ -182,10 +183,3 @@ class Token():
         else:
             print("please checked!")
             return None
-
-
-
-# def check_token(token):
-#     tokenobj = Token(token=token)
-#     if tokenobj.check()
-#         return tokenobj

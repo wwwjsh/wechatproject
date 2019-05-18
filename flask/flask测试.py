@@ -106,7 +106,7 @@ class launch_test(unittest.TestCase):
         self.token = newuser()
     def test_launchactivaty(self):
         '''测试用户发起一个项目'''
-        data = {'token': self.token, "item_name":'中心湖公园玩耍', "item_type": '1',# 1排队类型
+        data = { "item_name":'中心湖公园玩耍', "item_type": '1',# 1排队类型
                 "contacts":'qq:11111555', "timetable": [{'start_date': '2012-05-08', 'end_date': '2012-05-10', 'start_time': '14:00', 'end_time': '16:00' }],
                 "address": "中心湖公园",
                 "text_info": '大家记得来啊！', "objs":
