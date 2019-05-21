@@ -25,7 +25,7 @@ def join_info():
                 obj_data = [{"start_time": obj_time[0],
                              "obj": [{"obj_id": i.obj_id,"obj_name": i.obj_name,
                                       "minOrd_time": i.minOrd_time,"residue": i.residue}
-                                     for i in db.session.query(OrdObject).filter(OrdObject.startOrd_time == obj_time,
+                                     for i in db.session.query(OrdObject).filter(OrdObject.startOrd_time == obj_time[0],
                                                                                  OrdObject.itemId == item.item_id).all()]}
                             for obj_time in obj_time_distin]
 
@@ -44,7 +44,7 @@ def join_info():
                                 dealed_data[i]['objs'].append(data)
 
                 datadict = {"item_name": item.item_name, "item_type": item.item_type, "pass_id": item.pass_id, "start_time": json.dumps(item.start_time, cls=DateEncoder),
-                        "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": lau_user.nickname, "contacts": item.contacts,
+                        "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": item.contacter if item.contacter else lau_user.nickname, "contacts": item.contacts,
                         "item_address": item.item_address, "text_info": item.text_info, "img_info": item.img_info,
                         "lau_time": json.dumps(item.lau_time, cls=DateEncoder), "obj_data": dealed_data}
                 # print(obj_data[0]['start_time'][0].year) # 时间对象返回年

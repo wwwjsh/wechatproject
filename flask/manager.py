@@ -24,5 +24,6 @@ app.register_blueprint(login, url_prefix='')
 app.register_blueprint(homepage, url_prefix='')
 app.register_blueprint(iteminfo, url_prefix='/iteminfo')
 
+
 if __name__ == '__main__':
     app.run(debug=True)

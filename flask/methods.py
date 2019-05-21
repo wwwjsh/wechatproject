@@ -79,10 +79,8 @@ def get_user(js_code, app_id=appid, secret=secret):
         "js_code": js_code,
         "grant_type": 'authorization_code'
     }
-
     req_resuLt = requests.get(url=url, params=req_params, timeout=3, verify=False)
-
-    # 把返回的json数据转化成dict,返回字典类型
+    #把返回的json数据转化成dict,返回字典类型
     return req_resuLt.json()
 
 

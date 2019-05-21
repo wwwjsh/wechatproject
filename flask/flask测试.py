@@ -111,8 +111,8 @@ class launch_test(unittest.TestCase):
                 "address": "中心湖公园",
                 "text_info": '大家记得来啊！', "objs":
                     # [号码，预定对象的名称，最小预定时间，单位最小预定时间可预订的数量}
-                    [{'obj_num': 1, 'obj_name': '三号场', 'minOrd_time': 60, 'ordable_sum': 30},
-                     {'obj_num': 2, 'obj_name': '四号场', 'minOrd_time': 60, 'ordable_sum': 30}]}
+                    [{'obj_num': 0, 'obj_name': '三号场', 'minOrd_time': 60, 'ordable_sum': 30},
+                     {'obj_num': 1, 'obj_name': '四号场', 'minOrd_time': 60, 'ordable_sum': 30}]}
         response = app.test_client().post('/launchActivity',
                                           json={'token': self.token,
                                           'data': data})

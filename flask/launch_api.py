@@ -46,6 +46,10 @@ def get_start_end(timetable):
             min_datetime = start
         if end > max_datetime:
             max_datetime = end
+    # if not isinstance(min_datetime, str):
+    #     min_datetime = min_datetime.strftime("%Y-%m-%d %H:%M")
+    # if not isinstance(max_datetime, str):
+    #     max_datetime = max_datetime.strftime("%Y-%m-%d %H:%M")
     return (min_datetime, max_datetime)
 
 # 用户发起活动
@@ -66,7 +70,7 @@ def lau_item():
         item_address = data['data'].get("address", '')
         text_info = data['data'].get("text_info", '')
         ord_objects = data['data'].get("objs", '')
-        page_show = data['data'].get("objs", 1)
+        page_show = data['data'].get("page_show", 1)
         '''ord_objects:[{obj_num:int(3),obj_name:varchar(15),minOrd_time:int单位分钟,ordable_sum:预定类型为1 int(3) }]'''
         '''time:[{ start_date: '2012-05-08', end_date: '2012-05-10', start_time: '14:00', end_time: '16:00' }]'''
         # 非空验证
@@ -99,6 +103,7 @@ def lau_item():
                     for i in timetable:
                         obj_time.append(get_times_list(i['start_time'], i['end_time'], obj['minOrd_time']))
                     timelist.append(obj_time)
+                print(timelist)
                 try:
                     # print(timelist)
                     # print(dateIterator)
@@ -107,11 +112,12 @@ def lau_item():
                         for date in dateIterator[i]: # 遍历第i个时间段包含的日期
                             for obj_index in range(len(ord_objects)):
                                 for time in timelist[obj_index][i]:
+                                    print(time)
                                     startOrd_time = date + datetime.timedelta(hours=time.hour, minutes=time.minute)
                                     new_obj = OrdObject(itemId=new_item.item_id, obj_num=int(ord_objects[obj_index]["obj_num"]), obj_name=ord_objects[obj_index]["obj_name"],
                                                         minOrd_time=int(ord_objects[obj_index]["minOrd_time"]), startOrd_time=str(startOrd_time),
                                                         ordable_sum=int(ord_objects[obj_index]["ordable_sum"]), residue=int(ord_objects[obj_index]["ordable_sum"]))
-                                db.session.add(new_obj)
+                                    db.session.add(new_obj)
                         db.session.commit()
                         db.session.close()
                         info = {"errNum": 0, "errMsg": "success", "pass_id": pass_id}
@@ -121,9 +127,11 @@ def lau_item():
                     db.session.close()
                     info = {"errNum": -1, 'errMsg': "objError!"}
                     return jsonify(info)
-            except:
+            except Exception as e:
+                print(e)
+                db.session.rollback()
                 db.session.close()
-                info = {"errNum": -1, 'errMsg': "itemError!"}
+                info = {"errNum": -1, 'errMsg': "itemError!", "e":str(e)}
                 return jsonify(info)
         else:
             info = {"errNum": -1, 'errMsg': "formError!"}

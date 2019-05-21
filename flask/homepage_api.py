@@ -2,7 +2,6 @@
 
 from flask import Blueprint, json, jsonify, request
 from ord_models import *
-from methods import DateEncoder
 import datetime
 homepage = Blueprint('homepage', __name__)
 
@@ -24,6 +23,7 @@ def get_items():
         info = {'data': {'doing_items': doing_items, 'willbe_items': willbe_items}, "errNum": 0, "errMsg": "success"}
         return jsonify(info)
     else:
+        db.session.close()
         info = {"errNum": -1, 'errMsg': 'itemsError.'}
         return jsonify(info)
 
