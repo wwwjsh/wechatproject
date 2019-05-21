@@ -19,16 +19,16 @@ def join_info():
             lau_user = User.query.filter_by(openid=item.lau_usId).first()
             if lau_user:
                 obj_time_distin = db.session.query(OrdObject.startOrd_time).filter(OrdObject.itemId == item.item_id).distinct().order_by(OrdObject.startOrd_time).all()
-                # print(obj_time_distin)
+                print(type(obj_time_distin[0][0]))
                 # print(obj_time_distin.all()[0].startOrd_time)
                 # obj_timelist = OrdObject.query.filter_by(itemId= item.item_id).with_entities(OrdObject.startOrd_time).distinct().order_by(OrdObject.startOrd_time)
                 obj_data = [{"start_time": obj_time[0],
                              "obj": [{"obj_id": i.obj_id,"obj_name": i.obj_name,
                                       "minOrd_time": i.minOrd_time,"residue": i.residue}
-                                     for i in db.session.query(OrdObject).filter(OrdObject.startOrd_time == obj_time,
+                                     for i in db.session.query(OrdObject).filter(OrdObject.startOrd_time == obj_time[0],
                                                                                  OrdObject.itemId == item.item_id).all()]}
                             for obj_time in obj_time_distin]
-
+                # obj_data = 123
                 date_list = []
                 dealed_data = []
                 for data in obj_data:
@@ -44,7 +44,7 @@ def join_info():
                                 dealed_data[i]['objs'].append(data)
 
                 datadict = {"item_name": item.item_name, "item_type": item.item_type, "pass_id": item.pass_id, "start_time": json.dumps(item.start_time, cls=DateEncoder),
-                        "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": lau_user.nickname, "contacts": item.contacts,
+                        "end_time": json.dumps(item.end_time, cls=DateEncoder), "contacter": item.contacter if item.contacter else lau_user.nickname, "contacts": item.contacts,
                         "item_address": item.item_address, "text_info": item.text_info, "img_info": item.img_info,
                         "lau_time": json.dumps(item.lau_time, cls=DateEncoder), "obj_data": dealed_data}
                 # print(obj_data[0]['start_time'][0].year) # 时间对象返回年

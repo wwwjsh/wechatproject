@@ -100,7 +100,7 @@ def myjoined_itemlist():
             #                 'end_time': json.dumps(item.end_time, cls=DateEncoder)} for item in itemlist]
 
             # 返回项目的名称 口令 类型 是否过期 是否被逻辑删除（取消） 开始时间 结束时间 信息
-            item_todict = [{'item_name': item.item_name, 'pass_id': item.pass_id, 'item_type': item.item_type, 'text_info': item.text_info,
+            item_todict = [{'item_name': item.item_name, 'pass_id': item.pass_id, 'item_type': item.item_type, 'text_info': item.text_info, 'img_info': item.img_info,
                             'overed': (item.end_time<datetime.datetime.now()), 'start_time': json.dumps(item.start_time, cls=DateEncoder),
                             'end_time': json.dumps(item.end_time, cls=DateEncoder), 'address': item.item_address, 'logic_del': item.logic_del} for item in itemlist]
             info = { "errNum": 0, "errMsg": "success", 'data': item_todict}

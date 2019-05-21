@@ -32,7 +32,7 @@ def sign_in():
         return jsonify(info)
     #请求失败
     else:
-        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session["errmsg"]}
+        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session.get("errmsg", "sessionError")}
         return jsonify(info)
 
 token = Token()
