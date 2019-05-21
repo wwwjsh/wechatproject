@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 '''数据库模型文件'''
 app = Flask(__name__)
 # url的格式为：数据库的协议：//用户名：密码@ip地址：端口号（默认可以不写）/数据库名
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123456@localhost/ord?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:123456qw!@localhost/ord?charset=utf8mb4"
 #设置每次请求结束后会自动提交数据库中的改动
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_POOL_SIZE'] = 100
@@ -17,7 +17,10 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
     __tablename__ = 'users'
-
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8mb4'
+    }
     id = db.Column(db.INTEGER, primary_key=True)
     nickname = db.Column(db.String(30))
     avatarurl = db.Column(db.String(200))
@@ -29,7 +32,10 @@ class User(db.Model):
 
 class Item(db.Model):
     __tablename__ = 'items'
-
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8mb4'
+    }
     item_id = db.Column(db.INTEGER, primary_key=True)
     item_name = db.Column(db.String(20), nullable=False)
     pass_id = db.Column(db.CHAR(5), nullable=False, unique=True)
@@ -37,8 +43,8 @@ class Item(db.Model):
     item_type = db.Column(db.Enum('1', '2'), nullable=False)
     contacts = db.Column(db.String(20), nullable=False)
     contacter = db.Column(db.String(20))
-    start_time = db.Column(db.TIMESTAMP, nullable=False)
-    end_time = db.Column(db.TIMESTAMP, nullable=False)
+    start_time = db.Column(db.TIMESTAMP)
+    end_time = db.Column(db.TIMESTAMP)
     item_address = db.Column(db.String(60))
     text_info = db.Column(db.String(150))
     img_info = db.Column(db.String(100))
@@ -51,7 +57,10 @@ class Item(db.Model):
 
 class OrdObject(db.Model):
     __tablename__ = 'ord_objects'
-
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8mb4'
+    }
     obj_id = db.Column(db.INTEGER, primary_key=True)
     itemId = db.Column(db.ForeignKey('items.item_id'),  nullable=False, index=True)
     obj_num = db.Column(db.INTEGER, nullable=False)
@@ -67,7 +76,10 @@ class OrdObject(db.Model):
 
 class Order(db.Model):
     __tablename__ = 'orders'
-
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8mb4'
+    }
     ord_num = db.Column(db.INTEGER, primary_key=True)
     ord_itemId = db.Column(db.ForeignKey('items.item_id'),  nullable=False)
     ord_usId = db.Column(db.ForeignKey('users.openid'), nullable=False, index=True)
@@ -81,7 +93,10 @@ class Order(db.Model):
 
 class Orderinfo(db.Model):
     __tablename__ = 'orderinfo'
-
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8mb4'
+    }
     ord_id = db.Column(db.INTEGER, primary_key=True)
     ordNum = db.Column(db.ForeignKey('orders.ord_num'), nullable=False)
     objId = db.Column(db.ForeignKey('ord_objects.obj_id'),  nullable=False, index=True)
@@ -92,7 +107,7 @@ class Orderinfo(db.Model):
 
     db.create_all()
 if __name__ == '__main__':
-    #db.drop_all()
+    db.drop_all()
     db.create_all()
     # user = db.session.query(User).filter(User.id==1).first()
     # user.nickname = '改一下1'

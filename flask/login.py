@@ -15,21 +15,23 @@ def sign_in():
     js_code = json_data['code']
     user_session = get_user(js_code)  # 字典类型
     print(user_session)
+    session_key = user_session.get('session_key', 0)
+    openid = user_session.get('openid', 0)
     #0 请求成功
-    if user_session["errcode"] == 0:
-        tokenobj = Token(openid=user_session["openid"], session_key=user_session["session_key"])
+    if session_key and openid:
+        tokenobj = Token(openid=openid, session_key=session_key)
         token = tokenobj.set_pawd()
-        if not db.session.query(User).filter(User.openid==user_session["openid"]).first():
+        if not db.session.query(User).filter(User.openid==openid).first():
             #这是一个新用户
-            newuser = User(openid=user_session["openid"])
+            newuser = User(openid=openid)
             db.session.add(newuser)
             db.session.commit()
 
         info = {"errNum": 0, "errMsg": "success", 'User_token': token}
         return jsonify(info)
     #请求失败
-    elif user_session["errcode"] != 0:
-        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session["errmsg"]}
+    else:
+        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session.get("errmsg", "sessionError")}
         return jsonify(info)
 
 token = Token()
