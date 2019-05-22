@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 # 创建蓝图
 launch = Blueprint('launch', __name__)
 token = Token()
+
+
 def date_iterator(start_date, end_date):
     '''日期列表迭代器 存放每一个时间段里面的迭代器对象'''
     start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
@@ -21,6 +23,7 @@ def date_iterator(start_date, end_date):
     while date <= end_date:
         yield date
         date = date + datetime.timedelta(days=1)
+
 
 def get_times_list(start_time, end_time, minOrd_time):
     '''生成一个对象 的一个时间段的时间列表'''
@@ -35,13 +38,24 @@ def get_times_list(start_time, end_time, minOrd_time):
         time = time + datetime.timedelta(minutes=int(minOrd_time))
     return timelist
 
+
 def get_start_end(timetable):
     '''获取时间表的开始时间， 结束时间 作为该项目字段名'''
-    min_datetime = datetime.datetime.strptime(timetable[0]['start_date']+' '+timetable[0]['start_time'], '%Y-%m-%d %H:%M')
-    max_datetime = datetime.datetime.strptime(timetable[0]['end_date']+' '+timetable[0]['end_time'], '%Y-%m-%d %H:%M')
+    min_datetime = datetime.datetime.strptime(
+        timetable[0]['start_date'] +
+        ' ' +
+        timetable[0]['start_time'],
+        '%Y-%m-%d %H:%M')
+    max_datetime = datetime.datetime.strptime(
+        timetable[0]['end_date'] +
+        ' ' +
+        timetable[0]['end_time'],
+        '%Y-%m-%d %H:%M')
     for i in timetable:
-        start = datetime.datetime.strptime(i['start_date'] + ' ' + i['start_time'], '%Y-%m-%d %H:%M')
-        end = datetime.datetime.strptime(i['end_date'] + ' ' + i['end_time'], '%Y-%m-%d %H:%M')
+        start = datetime.datetime.strptime(
+            i['start_date'] + ' ' + i['start_time'], '%Y-%m-%d %H:%M')
+        end = datetime.datetime.strptime(
+            i['end_date'] + ' ' + i['end_time'], '%Y-%m-%d %H:%M')
         if start < min_datetime:
             min_datetime = start
         if end > max_datetime:
@@ -53,6 +67,8 @@ def get_start_end(timetable):
     return (min_datetime, max_datetime)
 
 # 用户发起活动
+
+
 @launch.route('/launchActivity', methods=['POST'])
 def lau_item():
     '''发起活动 相关函数参考some/test.py'''
@@ -75,10 +91,14 @@ def lau_item():
         '''time:[{ start_date: '2012-05-08', end_date: '2012-05-10', start_time: '14:00', end_time: '16:00' }]'''
         # 非空验证
         if (item_name and item_address and text_info and ord_objects and contacts and timetable):
-            # 生成日期列表迭代器dateIterator 迭代之后的结果date:[['2012-05-08', '2012-05-09', '2012-05-10']] 一项表示一个日期区间的切分结果
+            # 生成日期列表迭代器dateIterator 迭代之后的结果date:[['2012-05-08', '2012-05-09',
+            # '2012-05-10']] 一项表示一个日期区间的切分结果
             dateIterator = []
             for i in timetable:
-                dateIterator.append(date_iterator(i['start_date'], i['end_date']))
+                dateIterator.append(
+                    date_iterator(
+                        i['start_date'],
+                        i['end_date']))
 
             '''遍历寻找最预先的日期 和最终日期'''
             start_time, end_time = get_start_end(timetable)
@@ -89,19 +109,33 @@ def lau_item():
             #     # 防止pass_id重复
             #     pass_id = generate_random_str(5)
             try:
-                new_item = Item(lau_usId=lau_usId, item_name=item_name, pass_id=pass_id, item_type=str(item_type), contacts=contacts,
-                                start_time=start_time, end_time=end_time, item_address=item_address, text_info=text_info, contacter=contacter,
-                                page_show=page_show)
+                new_item = Item(
+                    lau_usId=lau_usId,
+                    item_name=item_name,
+                    pass_id=pass_id,
+                    item_type=str(item_type),
+                    contacts=contacts,
+                    start_time=start_time,
+                    end_time=end_time,
+                    item_address=item_address,
+                    text_info=text_info,
+                    contacter=contacter,
+                    page_show=page_show)
 
                 db.session.add(new_item)
                 db.session.flush()
                 # 根据每个对象的最小预定时间 划分time中每个时间段对应的时间生成时间关系矩阵
-                # 根据预定对象信息生成 时间列表  timelist = [[[14；00, 15:00],[根据第一个可预订对象， time第二个时间段切分的开始时间],...],[第二个可预订对象根据若干个time时间段的切分...]]
+                # 根据预定对象信息生成 时间列表  timelist = [[[14；00, 15:00],[根据第一个可预订对象，
+                # time第二个时间段切分的开始时间],...],[第二个可预订对象根据若干个time时间段的切分...]]
                 timelist = []
                 for obj in ord_objects:
                     obj_time = []
                     for i in timetable:
-                        obj_time.append(get_times_list(i['start_time'], i['end_time'], obj['minOrd_time']))
+                        obj_time.append(
+                            get_times_list(
+                                i['start_time'],
+                                i['end_time'],
+                                obj['minOrd_time']))
                     timelist.append(obj_time)
                 print(timelist)
                 try:
@@ -109,20 +143,33 @@ def lau_item():
                     # print(dateIterator)
                     # 生成根据多个开始时间段, 原来的obj信息，生成预定对象存入数据库
                     for i in range(len(timetable)):
-                        for date in dateIterator[i]: # 遍历第i个时间段包含的日期
+                        for date in dateIterator[i]:  # 遍历第i个时间段包含的日期
                             for obj_index in range(len(ord_objects)):
                                 for time in timelist[obj_index][i]:
                                     print(time)
-                                    startOrd_time = date + datetime.timedelta(hours=time.hour, minutes=time.minute)
-                                    new_obj = OrdObject(itemId=new_item.item_id, obj_num=int(ord_objects[obj_index]["obj_num"]), obj_name=ord_objects[obj_index]["obj_name"],
-                                                        minOrd_time=int(ord_objects[obj_index]["minOrd_time"]), startOrd_time=str(startOrd_time),
-                                                        ordable_sum=int(ord_objects[obj_index]["ordable_sum"]), residue=int(ord_objects[obj_index]["ordable_sum"]))
+                                    startOrd_time = date + \
+                                        datetime.timedelta(hours=time.hour, minutes=time.minute)
+                                    new_obj = OrdObject(
+                                        itemId=new_item.item_id,
+                                        obj_num=int(
+                                            ord_objects[obj_index]["obj_num"]),
+                                        obj_name=ord_objects[obj_index]["obj_name"],
+                                        minOrd_time=int(
+                                            ord_objects[obj_index]["minOrd_time"]),
+                                        startOrd_time=str(startOrd_time),
+                                        ordable_sum=int(
+                                            ord_objects[obj_index]["ordable_sum"]),
+                                        residue=int(
+                                            ord_objects[obj_index]["ordable_sum"]))
                                     db.session.add(new_obj)
                         db.session.commit()
                         db.session.close()
-                        info = {"errNum": 0, "errMsg": "success", "pass_id": pass_id}
+                        info = {
+                            "errNum": 0,
+                            "errMsg": "success",
+                            "pass_id": pass_id}
                         return jsonify(info)
-                except:
+                except BaseException:
                     db.session.rollback()
                     db.session.close()
                     info = {"errNum": -1, 'errMsg': "objError!"}
@@ -131,7 +178,7 @@ def lau_item():
                 print(e)
                 db.session.rollback()
                 db.session.close()
-                info = {"errNum": -1, 'errMsg': "itemError!", "e":str(e)}
+                info = {"errNum": -1, 'errMsg': "itemError!", "e": str(e)}
                 return jsonify(info)
         else:
             info = {"errNum": -1, 'errMsg': "formError!"}
@@ -161,23 +208,33 @@ def upload_itemimg():
     # print(type(json.loads(request.values.get('formData'))))
     # print(request.get_json())
     # 构造标准data
-    res_data = {'token': request.values.get('token'), 'wd': request.values.get('wd')}
+    res_data = {
+        'token': request.values.get('token'),
+        'wd': request.values.get('wd')}
     print(res_data)
+
     @token.checkbytoken
     def decorated(data):
-        item = db.session.query(Item).filter(Item.pass_id == data.get('wd', 0),
-                                             Item.lau_usId == data['token'].get_openid()).first()
+        item = db.session.query(Item).filter(Item.pass_id == data.get(
+            'wd', 0), Item.lau_usId == data['token'].get_openid()).first()
         if item:
             file = request.files['file']
-            #获取二进制数据
+            # 获取二进制数据
             if not (file and allowed_file(file.filename)):
-                info = {"errNum": -1, "errMsg": "请检查上传的图片类型，仅限于png、PNG、jpg、JPG、bmp"}
+                info = {
+                    "errNum": -1,
+                    "errMsg": "请检查上传的图片类型，仅限于png、PNG、jpg、JPG、bmp"}
                 return jsonify(info)
             else:
                 try:
                     basepath = os.path.dirname(__file__)  # 当前文件所在路径
-                    upload_path = os.path.join(basepath, 'static/itemimg', secure_filename(file.filename))  # 注意：没有的文件夹一定要先创建，不然会提示没有该路径
-                    # upload_path = os.path.join(basepath, 'static/images','test.jpg')  #注意：没有的文件夹一定要先创建，不然会提示没有该路径
+                    upload_path = os.path.join(
+                        basepath,
+                        'static/itemimg',
+                        secure_filename(
+                            file.filename))  # 注意：没有的文件夹一定要先创建，不然会提示没有该路径
+                    # upload_path = os.path.join(basepath,
+                    # 'static/images','test.jpg')  #注意：没有的文件夹一定要先创建，不然会提示没有该路径
                     file.save(upload_path)
                     # with open(upload_path, 'rb') as f:
                     #     a = f.read()
@@ -187,13 +244,22 @@ def upload_itemimg():
                     # # cv2.imwrite(os.path.join(basepath, 'static/itemimg', filename), img, [int(cv2.IMWRITE_JPEG_QUALITY),70])
                     # print(img)
                     newfilename = generate_random_str(12) + '.jpg'
-                    os.rename(os.path.join(basepath, 'static/itemimg', secure_filename(file.filename)),
-                              os.path.join(basepath, 'static/itemimg', newfilename))
+                    os.rename(
+                        os.path.join(
+                            basepath,
+                            'static/itemimg',
+                            secure_filename(
+                                file.filename)),
+                        os.path.join(
+                            basepath,
+                            'static/itemimg',
+                            newfilename))
                     # 使用Opencv转换一下图片格式和名称 转换成jpg
                     img = cv2.imread('./static/itemimg/' + newfilename)
                     print(img)
                     # print(type(img)) img是none
-                    cv2.imwrite('./static/itemimg/' + newfilename, img, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                    cv2.imwrite('./static/itemimg/' + newfilename,
+                                img, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
                     # item.img_info = newfilename + ".jpg"
                     item.img_info = newfilename
                     # try_db_commit(item)
@@ -201,7 +267,7 @@ def upload_itemimg():
                     db.session.commit()
                     info = {"errNum": 0, "errMsg": "success"}
                     return jsonify(info)
-                except:
+                except BaseException:
                     db.session.close()
                     info = {"errNum": -1, "errMsg": "serverError."}
                     return jsonify(info)
@@ -210,6 +276,3 @@ def upload_itemimg():
             info = {"errNum": -1, "errMsg": "itemError."}
             return jsonify(info)
     return decorated(res_data)
-
-
-

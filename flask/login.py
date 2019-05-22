@@ -4,11 +4,11 @@ from flask import Blueprint, json, request, jsonify
 from ord_models import *
 from methods import get_user, Token, WXBizDataCrypt, try_db_commit, appid, secret
 
-#创建蓝图
+# 创建蓝图
 login = Blueprint('login', __name__)
 
 
-#登录 返回token数据 更新token数据
+# 登录 返回token数据 更新token数据
 @login.route('/newuser', methods=['POST'])
 def sign_in():
     json_data = request.get_json()
@@ -18,28 +18,35 @@ def sign_in():
     print(user_session)
     session_key = user_session.get('session_key', 0)
     openid = user_session.get('openid', 0)
-    #0 请求成功
+    # 0 请求成功
     if session_key and openid:
         tokenobj = Token(openid=openid, session_key=session_key)
         token = tokenobj.set_pawd()
-        if not db.session.query(User).filter(User.openid==openid).first():
-            #这是一个新用户
+        if not db.session.query(User).filter(User.openid == openid).first():
+            # 这是一个新用户
             newuser = User(openid=openid)
             db.session.add(newuser)
             db.session.commit()
 
         info = {"errNum": 0, "errMsg": "success", 'User_token': token}
         return jsonify(info)
-    #请求失败
+    # 请求失败
     else:
-        info = {"errNum": -1, "errMsg": "condeError.", 'WxerrMsg': user_session.get("errmsg", "sessionError")}
+        info = {
+            "errNum": -1,
+            "errMsg": "condeError.",
+            'WxerrMsg': user_session.get(
+                "errmsg",
+                "sessionError")}
         return jsonify(info)
+
 
 token = Token()
 
+
 @login.route('/user/update', methods=['POST'])
 def update_userinfo():
-    #用户修改个人信息
+    # 用户修改个人信息
     @token.checkbytoken
     def decorated(data):
         openid = data['token'].get_openid()
@@ -48,7 +55,7 @@ def update_userinfo():
             try:
                 address = data['address']
                 phone = data['phone']
-            except:
+            except BaseException:
                 info = {"errNum": -1, "errMsg": "keysError."}
                 return jsonify(info)
             if address:
@@ -70,7 +77,7 @@ def upload_userinfo():
         try:
             encryptedData = data['encryptedData']
             iv = data['iv']
-        except:
+        except BaseException:
             info = {"errNum": -1, "errMsg": "keysError."}
             return jsonify(info)
         # sessionKey用Redis数据库
@@ -80,13 +87,14 @@ def upload_userinfo():
         userinfo = pc.decrypt(encryptedData, iv)
         #item = Item.query.filter_by(pass_id=pass_id).first()
         '''存在bug 一个用户可以用截获的他人的表单 验证自己的token 然后修改他人的新型'''
-        user = db.session.query(User).filter_by(openid=userinfo['openId']).first()
+        user = db.session.query(User).filter_by(
+            openid=userinfo['openId']).first()
         if user:
-            user.nickname = userinfo['nickName']  # 存在问题:多用户在高并发的情况下对同一数据进行操作可能会返回错误的队号
+            # 存在问题:多用户在高并发的情况下对同一数据进行操作可能会返回错误的队号
+            user.nickname = userinfo['nickName']
             user.avatarurl = userinfo['avatarUrl']
             return try_db_commit(user)
         else:
             info = {"errNum": -1, 'errMsg': "withoutloginopra."}
             return jsonify(info)
     return decorated(request)
-
