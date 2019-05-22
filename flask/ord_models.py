@@ -70,17 +70,26 @@ class OrdObject(db.Model):
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8mb4'
     }
+    # 可预定对象的id（尽管场地是一样的，不同场地，时间下对应的id会不一样）
     obj_id = db.Column(db.INTEGER, primary_key=True)
+    # 该可预订对象所属的项目的id
     itemId = db.Column(
         db.ForeignKey('items.item_id'),
         nullable=False,
         index=True)
+    # 可预订对象所属的场地的编号，与时间段无关
     obj_num = db.Column(db.INTEGER, nullable=False)
+    # 可预订对象所属的场地的名称
     obj_name = db.Column(db.String(15))
+    # 该场地的最小预定时间
     minOrd_time = db.Column(db.INTEGER, nullable=False)
+    # 该预定对象的开始时间
     startOrd_time = db.Column(db.DateTime, nullable=False)
+    # 该预定对象创建时允许被预定的次数
     ordable_sum = db.Column(db.INTEGER, nullable=False)
+    # 该预定对象当前剩余的可被允许预定的次数
     residue = db.Column(db.INTEGER, nullable=False)
+    # 该预定对象的项目是否被取消 如果外键项目被取消会是0
     logic_del = db.Column(db.INTEGER, server_default=db.text("'1'"))
 
     item = db.relationship('Item')
@@ -95,17 +104,24 @@ class Order(db.Model):
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8mb4'
     }
+    # 预定请求单号，一个预定网络请求对应一个单号
     ord_num = db.Column(db.INTEGER, primary_key=True)
+    # 该预定请求要预定的项目
     ord_itemId = db.Column(db.ForeignKey('items.item_id'), nullable=False)
+    # 发起预定请求的用户的openID
     ord_usId = db.Column(
         db.ForeignKey('users.openid'),
         nullable=False,
         index=True)
+    # 预定请求需要支付的价格总额（预留功能目前没有用处）
     ord_price = db.Column(db.INTEGER, server_default=db.text("'0'"))
+    # 价格支付状态
     pay_status = db.Column(db.Enum('0', '1'), server_default=db.text("'0'"))
+    # 发起预定请求的时间
     place_time = db.Column(
         db.TIMESTAMP,
         server_default=db.text("CURRENT_TIMESTAMP"))
+    # 该预定请求单是否已经被取消 1表示正常 0表示已取消
     cancel_del = db.Column(db.INTEGER, server_default=db.text("'1'"))
 
     # 用户取消加入活动 需要添加一个外键 通过连接修改该字段 查询信息自己加入的时候 使用两个子链接 再进行内连接
@@ -119,19 +135,22 @@ class Orderinfo(db.Model):
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8mb4'
     }
+    # 主键
     ord_id = db.Column(db.INTEGER, primary_key=True)
+    # 所属的预定请求单号
     ordNum = db.Column(db.ForeignKey('orders.ord_num'), nullable=False)
+    # 被预定的可预订对象的id
     objId = db.Column(
         db.ForeignKey('ord_objects.obj_id'),
         nullable=False,
         index=True)
+    # 该可预订对象分配的队列号码
     queue_num = db.Column(db.INTEGER, server_default=db.text("'-1'"))
-    ord_object = db.relationship('OrdObject')
 
+    ord_object = db.relationship('OrdObject')
     order = db.relationship('Order')
 
-    db.create_all()
-
+# db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()

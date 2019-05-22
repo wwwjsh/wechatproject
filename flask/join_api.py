@@ -2,7 +2,7 @@
 
 from flask import Blueprint, json, request, jsonify
 from ord_models import *
-from methods import DateEncoder, Token, try_db_commit
+from methods import DateEncoder, Token
 import datetime
 # 创建蓝图
 join = Blueprint('join', __name__)
