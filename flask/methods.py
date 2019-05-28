@@ -11,7 +11,7 @@ import hmac
 import secrets
 from flask import jsonify
 from functools import wraps
-from ord_models import db
+from model.ord_models import db
 
 # 配置小程序appid和secret
 appid = 'wx64118b44bbd3bfa3'

@@ -1,7 +1,7 @@
 '''用户登录相关的api'''
 
 from flask import Blueprint, json, request, jsonify
-from ord_models import *
+from model.ord_models import *
 from methods import get_user, Token, WXBizDataCrypt, try_db_commit, appid, secret
 
 # 创建蓝图

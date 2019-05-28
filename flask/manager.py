@@ -10,7 +10,7 @@ from join_api import join
 from login import login
 from iteminfo_api import iteminfo
 from homepage_api import homepage
-
+from collect_formId import collect_formId
 
 app = Flask(__name__)
 
@@ -26,7 +26,8 @@ app.register_blueprint(join, url_prefix='')
 app.register_blueprint(login, url_prefix='')
 app.register_blueprint(homepage, url_prefix='')
 app.register_blueprint(iteminfo, url_prefix='/iteminfo')
+app.register_blueprint(collect_formId, url_prefix='')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, threaded=True)

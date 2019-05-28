@@ -1,4 +1,5 @@
 '''数据orm对象生成和操作'''
+import datetime
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -152,9 +153,46 @@ class Orderinfo(db.Model):
 
 # db.create_all()
 
+
 if __name__ == '__main__':
     # db.drop_all()
     db.create_all()
+    # now = datetime.datetime.now()
+    # timedel = datetime.datetime.now() + datetime.timedelta(minutes=60)
+    # # 搜索所有快要开始的活动
+    # objlist = db.session.query(OrdObject.obj_id).filter(
+    #     OrdObject.startOrd_time <= timedel,
+    #     OrdObject.startOrd_time <= now)
+    # # 搜索相关订单
+    # ordlist = db.session.query(Orderinfo.ordNum).filter(
+    #     Orderinfo.objId.in_(objlist)
+    # )
+    # # 搜索所有这个活动的用户， 并且逐个推送
+    # userid = db.session.query(Order.ord_usId).filter(
+    #     Order.ord_num.in_(ordlist)
+    # )
+    # # result = db.session.query(Item.item_id, Item.item_name, Item.item_address, Order, OrdObject).join(Orderinfo, Order.ord_num == Orderinfo.ordNum).outerjoin(OrdObject).filter(OrdObject.obj_id == Orderinfo.objId, OrdObject.startOrd_time <= timedel,
+    # # OrdObject.startOrd_time <=
+    # # now).order_by(OrdObject.startOrd_time).group_by(Item.item_id)
+    # result = db.session.query(
+    #     Item.item_id,
+    #     Item.item_name,
+    #     Item.item_address,
+    #     Order.ord_usId,
+    #     db.func.min(
+    #         OrdObject.startOrd_time)).join(
+    #     Orderinfo,
+    #     Order.ord_num == Orderinfo.ordNum).outerjoin(OrdObject).filter(
+    #             OrdObject.obj_id == Orderinfo.objId,
+    #             OrdObject.startOrd_time <= timedel,
+    #             OrdObject.startOrd_time <= now).group_by(
+    #                 Item.item_id,
+    #     Order.ord_usId)
+    # result = db.session.query(Item, db.func.count(Item.item_name)).distinct(Item.item_id, Order.ord_usId)
+    # print(dir(result.all()[0]))
+    # print(result.all())
+    # print(result.all())
+    '''set @@global.sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';'''
     # user = db.session.query(User).filter(User.id==1).first()
     # user.nickname = '改一下1'
     # db.session.commit()

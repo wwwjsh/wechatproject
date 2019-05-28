@@ -1,7 +1,7 @@
 '''首页要调用的api'''
 
 from flask import Blueprint, json, jsonify, request
-from ord_models import *
+from model.ord_models import *
 import datetime
 homepage = Blueprint('homepage', __name__)
 

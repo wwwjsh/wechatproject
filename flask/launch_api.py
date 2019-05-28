@@ -1,7 +1,7 @@
 '''用户发起项目活动调用api'''
 
 from flask import Blueprint, json, request, jsonify
-from ord_models import *
+from model.ord_models import *
 import datetime
 import os
 import cv2

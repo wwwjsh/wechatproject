@@ -1,7 +1,7 @@
 '''查看项目信息要调用的api，包括用户查看我加入的项目信息和我发起的项目信息'''
 
 from flask import Blueprint, json, request, jsonify
-from ord_models import *
+from model.ord_models import *
 from methods import DateEncoder, Token, datetime_to_list
 import datetime
 

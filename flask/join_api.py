@@ -1,7 +1,7 @@
 '''用户执行加入操作时调用的api'''
 
 from flask import Blueprint, json, request, jsonify
-from ord_models import *
+from model.ord_models import *
 from methods import DateEncoder, Token
 import datetime
 # 创建蓝图
